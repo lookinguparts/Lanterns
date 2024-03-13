@@ -1,30 +1,43 @@
 #include <FastLED.h>
 int state=0;
 int trigger=0;
+int StartPin=3;
+int numSensors=5;
+uint8_t flicker=0;
 CRGB leds[1];
 uint8_t hue;
 void setup() {
   // put your setup code here, to run once:
   FastLED.addLeds<NEOPIXEL, 3>(leds, 1);
 pinMode(13,OUTPUT);
-pinMode(12,INPUT_PULLUP);
+for(int i=0;i<numSensors;i++){
+pinMode(i+StartPin,INPUT_PULLUP);
+
+}
+
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+
   if(trigger>0){
     trigger--;
-    state=1-state;
-    leds[0]=CHSV(hue++,0,255*state); 
+    flicker--;
+    flicker=1-flicker;
+    leds[0]=CHSV(state*50,255,flicker); 
   FastLED.show();
-    delay(30);
+    delay(10);
   }
     else{  
-  state=digitalRead(12);
-  trigger=(1-state)*256;
-digitalWrite(13, state);  
-leds[0]=CHSV(hue++,255,255*state); 
+     state=0; 
+      for(int i=0;i<numSensors;i++){
+
+state+=(1-digitalRead(i+StartPin))*(i+1);
+}
+  if(state>0){ trigger=2048;}
+ 
+//digitalWrite(13, state);  
+leds[0]=CHSV(hue++,255,255); 
 FastLED.show();
   // Send the updated pixel colors to the hardware.
 
